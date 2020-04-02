@@ -42,7 +42,8 @@ def notify(members, new_members, bot):
             continue
         msg += member.nick + " "
     msg += str(len(new_members)) + ")"
-    bot.send_message(chat_id=config["UserId"], text=msg)
+    for user in config["UserId"]:
+        bot.send_message(chat_id=user, text=msg)
 
 
 @client.event
@@ -52,8 +53,9 @@ async def on_ready():
     print(client.user.id)
     print('------')
     bot = telegram.Bot(config["TelegramToken"])
-    bot.send_message(chat_id=config["UserId"],
-                     text="Started the bot, you will receive notification when a user connects to discord")
+    for user in config["UserId"]:
+        bot.send_message(chat_id=user,
+                         text="Started the bot, you will receive notification when a user connects to discord")
     members = []
     while True:
         # get the channel data

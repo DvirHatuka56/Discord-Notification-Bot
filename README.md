@@ -8,7 +8,7 @@ create file in the project directory named config.json
     {
       "DiscordToken": "DISCORD_TOKEN",
       "TelegramToken": "TELEGRAM_TOKEN",
-      "UserId": USER_ID,
+      "UserId": [USER_ID1, USER_ID2],
       "ServerId": SERVER_ID,
       "ChannelId": CHANNEL_ID
     }
@@ -30,7 +30,7 @@ Enter this value as a string
     USER_ID
 look here how to get it \
 https://support.bigone.com/hc/en-us/articles/360008014894-How-to-get-the-Telegram-user-ID- \
-Enter this value as an int
+Enter this value as an int (you can add more than one, its a list)
 
     CHANNEL_ID SERVER_ID
 look here how to get those \
