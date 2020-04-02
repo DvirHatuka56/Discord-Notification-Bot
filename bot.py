@@ -10,7 +10,7 @@ CHANNEL_ID = 111111111111111111  # the discord channel id (inside the server)
 client = discord.Client()
 bot = telegram.Bot(TELEGRAM_TOKEN)
 bot.send_message(chat_id=USER_ID, text="Started the bot, you will receive notification when a user connects to "
-                                         "discord")
+                                       "discord")
 
 
 def notify(members):
@@ -40,4 +40,3 @@ async def on_ready():
 
 
 client.run(DISCORD_TOKEN)
-
