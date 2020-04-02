@@ -28,14 +28,18 @@ def find_diff(lst1, lst2):
 def notify(members, new_members, bot):
     msg = ""
     try:
-        if len(members) < len(new_members):
-            msg = find_diff(members, new_members).nick + " נכנס"
-        if len(members) > len(new_members):
-            msg = find_diff(members, new_members).nick + " עזב"
+        diff_member = find_diff(members, new_members)
+        if not diff_member.bot:
+            if len(members) < len(new_members):
+                msg = diff_member.nick + " נכנס"
+            if len(members) > len(new_members):
+                msg = diff_member.nick + " עזב"
     except AttributeError:
         print("error")
     msg += " | ("
     for member in new_members:
+        if member.bot:
+            continue
         msg += member.nick + " "
     msg += str(len(new_members)) + ")"
     bot.send_message(chat_id=config["UserId"], text=msg)
