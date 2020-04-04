@@ -1,3 +1,4 @@
 .idea/
 __pychache__
-config.json
+/config.json
+/setting.json

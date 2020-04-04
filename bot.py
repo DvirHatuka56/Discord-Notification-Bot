@@ -1,9 +1,10 @@
 import discord
 import telegram
 import json
+import handler
 
 
-def get_config(path="config.json"):
+def get_config(path="D:/JetBrainsProjects/PycharmProjects/DiscordBot/config.json"):
     with open(path, "r") as reader:
         return json.loads(reader.read())
 
@@ -12,38 +13,19 @@ client = discord.Client()
 config = get_config()
 
 
-def find_diff(lst1, lst2):
-    ret = None
-    for item in lst1:
-        if item not in lst2:
-            ret = item
-    if ret is not None:
-        return ret
-    for item in lst2:
-        if item not in lst1:
-            ret = item
-    return ret
-
-
-def notify(members, new_members, bot):
-    msg = ""
-    try:
-        diff_member = find_diff(members, new_members)
-        if not diff_member.bot:
-            if len(members) < len(new_members):
-                msg = diff_member.nick + " נכנס"
-            if len(members) > len(new_members):
-                msg = diff_member.nick + " עזב"
-    except AttributeError:
-        print("error")
-    msg += " | ("
-    for member in new_members:
-        if member.bot:
+def notify(members, new_members, bot, channel):
+    for user in [*handler.settings]:
+        message = handler.get_message(user, channel, members, new_members)
+        if message == "":
             continue
-        msg += member.nick + " "
-    msg += str(len(new_members)) + ")"
-    for user in config["UserId"]:
-        bot.send_message(chat_id=user, text=msg)
+        bot.send_message(chat_id=handler.settings[user]["TelegramId"], text=message)
+
+
+@client.event
+async def on_message(message):
+    if message.content.startswith("DNB!"):
+        reply = handler.handle_message(message)
+        await message.channel.send(reply)
 
 
 @client.event
@@ -53,19 +35,20 @@ async def on_ready():
     print(client.user.id)
     print('------')
     bot = telegram.Bot(config["TelegramToken"])
-    for user in config["UserId"]:
-        bot.send_message(chat_id=user,
-                         text="Started the bot, you will receive notification when a user connects to discord")
-    members = []
+    members = {}
     while True:
-        # get the channel data
-        await client.fetch_channel(config["ChannelId"])
-        channel = client.get_channel(config["ChannelId"])
+        # get the channels data
+        for channel_id in handler.channels:
+            await client.fetch_channel(channel_id)
+            channel = client.get_channel(channel_id)
 
-        # notify if there is more than one member
-        if 1 <= len(channel.members) and channel.members != members:
-            notify(members, channel.members, bot)
-        members = channel.members
+            if channel_id not in members.keys():
+                members[channel_id] = []
+
+            # notify if there is more than one member
+            if channel.members != members[channel_id]:
+                notify(members[channel_id], channel.members, bot, channel)
+            members[channel_id] = channel.members
 
 
 client.run(config["DiscordToken"])
