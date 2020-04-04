@@ -10,16 +10,16 @@ def read_setting(path=_PATH):
 
 
 _commands = {
-    "Add": lambda d: add_user(d),
-    "Update": lambda d: update(d),
-    "Set": lambda d: set_property(d),
-    "Remove": lambda d: remove(d),
-    "Pause": lambda d: deactivate(d),
-    "Continue": lambda d: activate(d),
-    "Show": lambda d: show(d),
-    "AddChannel": lambda d: add_channel(d),
-    "RemoveChannel": lambda d: remove_channel(d),
-    "Help": lambda d: help_message(d)
+    "add": lambda d: add_user(d),
+    "update": lambda d: update(d),
+    "set": lambda d: set_property(d),
+    "remove": lambda d: remove(d),
+    "pause": lambda d: deactivate(d),
+    "continue": lambda d: activate(d),
+    "show": lambda d: show(d),
+    "addChannel": lambda d: add_channel(d),
+    "removeChannel": lambda d: remove_channel(d),
+    "help": lambda d: help_message(d)
 }
 
 _default_values = {
@@ -56,7 +56,7 @@ def handle_message(msg):
 
 def add_user(data):
     if data.user.name in settings:
-        return "You're already in, use DNB!Show to show your current telegram id or DNB!Update to update it"
+        return "You're already in, use d!show to show your current telegram id or d!update to update it"
     if len(data.parameters) != 1:
         return "I need your telegram id, nothing more, nothing less"
     settings[data.user.name] = dict()
@@ -69,7 +69,7 @@ def add_user(data):
 
 def update(data):
     if data.user.name not in settings:
-        return "Add your telegram id first with DNB!Add"
+        return "Add your telegram id first with d!add"
     settings[data.user.name]["TelegramId"] = int(data.parameters[0])
     save_settings()
     return "Updated!"
@@ -77,7 +77,7 @@ def update(data):
 
 def set_property(data):
     if data.user.name not in settings:
-        return "Add your telegram id first with DNB!Add"
+        return "Add your telegram id first with d!add"
     try:
         preference = data.parameters[0]
         value = data.parameters[1]
@@ -95,9 +95,9 @@ def set_property(data):
         settings[data.user.name][preference] = value
         save_settings()
     except KeyError:
-        return "That's not a preference... use DNB!Help to see the preferences"
+        return "That's not a preference... use d!help to see the preferences"
     except ValueError:
-        return "That's not a value... use DNB!Help to see the preference's values"
+        return "That's not a value... use d!help to see the preference's values"
     except IndexError:
         return "I need both preference and value, I'm not AI (yet...)"
     return "Updated!"
@@ -113,18 +113,18 @@ def remove(data):
 
 def deactivate(data):
     if data.user.name not in settings:
-        return "Add your telegram id first with DNB!Add"
+        return "Add your telegram id first with d!add"
     settings[data.user.name]["Active"] = False
     save_settings()
     return """
 Ok, Boomer...
-Use DNB!Continue command to get notifications again
+Use d!continue command to get notifications again
     """
 
 
 def activate(data):
     if data.user.name not in settings:
-        return "Add your telegram id first with DNB!Add"
+        return "Add your telegram id first with d!add"
     settings[data.user.name]["Active"] = True
     save_settings()
     return "Hell yeah! we're back on track"
@@ -132,11 +132,10 @@ def activate(data):
 
 def show(data):
     if data.user.name not in settings:
-        return "Add your telegram id first with DNB!Add"
+        return "Add your telegram id first with d!add"
     if len(data.parameters) > 0:
         return str(settings[data.user.name]).replace("{", "").replace("}", "").replace("'", "")
 
-    # TODO: add additional data
     return f"""
 Here's what I know about you {data.user.name}:
 Your telegram id is {settings[data.user.name]["TelegramId"]}
@@ -146,6 +145,8 @@ You {"want" if settings[data.user.name]["Leave"] else "don't want"} to know when
 You {"want" if settings[data.user.name]["Bots"] else "don't want"} to know when bot enters or leaves the channel
 You'll get a notification when there are between {settings[data.user.name]["MinMembers"]} to {settings[data.user.name]["MaxMembers"]} users talking
 You're {"cool" if settings[data.user.name]["DetailedMessage"] else "not cool"} with detailed messages
+You {"care" if settings[data.user.name]["ChannelName"] else "don't care"} about the channel info
+The channels you track are: {str(settings[data.user.name]["Channels"]).replace("[", "").replace("]", "")}
 
 That's pretty much it 
 """
@@ -153,7 +154,7 @@ That's pretty much it
 
 def add_channel(data):
     if data.user.name not in settings:
-        return "Add your telegram id first with DNB!Add"
+        return "Add your telegram id first with d!add"
     if len(data.parameters) != 1:
         return "I need the channel id, nothing more, nothing less"
     channel_id = int(data.parameters[0])
@@ -167,13 +168,22 @@ def add_channel(data):
 
 def remove_channel(data):
     if data.user.name not in settings:
-        return "Add your telegram id first with DNB!Add"
+        return "Add your telegram id first with d!add"
     if len(data.parameters) != 1:
         return "I need the channel id, nothing more, nothing less"
     channel_id = int(data.parameters[0])
-    # TODO: remove from global channels if no one use the channel
+
     if channel_id in settings[data.user.name]["Channels"]:
         settings[data.user.name]["Channels"].remove(channel_id)
+
+    usage = False
+    for value in settings.values():
+        if channel_id in value["Channels"]:
+            usage = True
+            break
+    if not usage:
+        channels.remove(channel_id)
+
     save_settings()
     return "Updated!"
 
@@ -184,27 +194,27 @@ def help_message(data):
     if command not in _commands.keys():
         msg += command + " is not a command."
 
-    # TODO: add info on the remove channel command
     msg += """
 The available commands are:
-DNB!Add TELEGRAM_ID - add your telegram id
-DNB!Update TELEGRAM_ID - update your telegram id
-DNB!AddChannel CHANNEL_ID - add channel that you want to get notifications on
-DNB!Set Preference Value - set a notification preference to a certain value
-DNB!Remove - remove yourself from the service
-DNB!Pause - pause the service
-DNB!Continue - continue the service
-DNB!Help - help info
-DNB!Show - show your preferences 
+    d!add TELEGRAM_ID - add your telegram id
+    d!update TELEGRAM_ID - update your telegram id
+    d!addChannel CHANNEL_ID - add channel that you want to get notifications on
+    d!removeChannel CHANNEL_ID - remove channel that you don't want to get notifications on
+    d!set Preference Value - set a notification preference to a certain value
+    d!remove - remove yourself from the service
+    d!pause - pause the service
+    d!continue - continue the service
+    d!help - help info
+    d!show - show your preferences 
 
 Preferences:
-Join (On / Off) - get notification whenever user connects  
-Leave (On / Off) - get notification whenever user disconnects
-Bots (On / Off) - get notification whenever bots connects / disconnects
-DetailedMessage (On / Off) - get notification with the names of the users and the number of users connected
-ChannelName (On / Off) - get notification with the channel's name
-MinConnected (number) - get notification when there are more than a certain numbers of users connected
-MaxConnected (number) - DONT get notification when there are more than a certain numbers of users connected
+    Join (On / Off) - get notification whenever user connects  
+    Leave (On / Off) - get notification whenever user disconnects
+    Bots (On / Off) - get notification whenever bots connects / disconnects
+    DetailedMessage (On / Off) - get notification with the names of the users and the number of users connected
+    ChannelName (On / Off) - get notification with the channel's name
+    MinConnected (number) - get notification when there are more than a certain numbers of users connected
+    MaxConnected (number) - DONT get notification when there are more than a certain numbers of users connected
 
 Dvir Hatuka - 2020, https://github.com/DvirHatuka56/Discord-Notification-Bot
     """
@@ -213,7 +223,7 @@ Dvir Hatuka - 2020, https://github.com/DvirHatuka56/Discord-Notification-Bot
 
 
 def extract_command(content):
-    content = content[4:]  # remove DNB!
+    content = content[2:]  # remove d!
     command = content.split(" ")
     if len(command) == 1:
         return command[0], []
@@ -259,7 +269,7 @@ def get_message(name, channel, old_users, new_users):
         if preferences["DetailedMessage"]:
             msg += " ( "
             for user in new_users:
-                msg += user.name
+                msg += user.name + " "
             msg += str(len(new_users)) + " )"
         if preferences["ChannelName"]:
             msg += " on " + channel.guild.name + "/" + channel.name

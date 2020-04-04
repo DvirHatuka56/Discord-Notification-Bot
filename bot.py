@@ -23,7 +23,7 @@ def notify(members, new_members, bot, channel):
 
 @client.event
 async def on_message(message):
-    if message.content.startswith("DNB!"):
+    if message.content.lower().startswith("d!"):
         reply = handler.handle_message(message)
         await message.channel.send(reply)
 
