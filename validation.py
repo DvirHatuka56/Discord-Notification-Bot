@@ -1,6 +1,8 @@
 import telegram
 import telegram.error
 import json
+import discord
+import discord.errors
 
 
 def get_config(path="config.json"):
@@ -19,3 +21,15 @@ def validate_telegram_id(telegram_id):
         return True
     except telegram.error.TelegramError:
         return False
+
+
+def validate_channel_id(guild: discord.Guild, channel_id: int):
+    try:
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            return ""
+        return channel.name
+    except discord.errors.DiscordException:
+        return ""
+    except AttributeError:
+        return ""

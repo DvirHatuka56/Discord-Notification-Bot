@@ -57,7 +57,7 @@ def handle_message(msg):
     return reply
 
 
-def add_user(data):
+def add_user(data: CommandData):
     if data.user.name in settings:
         return "You're already in, use d!show to show your current telegram id or d!update to update it"
     if len(data.parameters) != 1:
@@ -73,7 +73,7 @@ def add_user(data):
     return "Your id set to " + data.parameters[0] + " with the default preferences"
 
 
-def update(data):
+def update(data: CommandData):
     if data.user.name not in settings:
         return "Add your telegram id first with d!add"
     if not validation.validate_telegram_id(data.parameters[0]):
@@ -83,7 +83,7 @@ def update(data):
     return "Updated!"
 
 
-def set_property(data):
+def set_property(data: CommandData):
     if data.user.name not in settings:
         return "Add your telegram id first with d!add"
     try:
@@ -111,7 +111,7 @@ def set_property(data):
     return "Updated!"
 
 
-def remove(data):
+def remove(data: CommandData):
     if data.user.name not in settings:
         return "Already?! Am I that bad?"
     del settings[data.user.name]
@@ -120,7 +120,7 @@ def remove(data):
     return "R.I.P you " + data.user.name
 
 
-def deactivate(data):
+def deactivate(data: CommandData):
     if data.user.name not in settings:
         return "Add your telegram id first with d!add"
     settings[data.user.name]["Active"] = False
@@ -131,7 +131,7 @@ Use d!continue command to get notifications again
     """
 
 
-def activate(data):
+def activate(data: CommandData):
     if data.user.name not in settings:
         return "Add your telegram id first with d!add"
     settings[data.user.name]["Active"] = True
@@ -139,7 +139,7 @@ def activate(data):
     return "Hell yeah! we're back on track"
 
 
-def show(data):
+def show(data: CommandData):
     if data.user.name not in settings:
         return "Add your telegram id first with d!add"
     if len(data.parameters) > 0:
@@ -161,22 +161,25 @@ That's pretty much it
 """
 
 
-def add_channel(data):
+def add_channel(data: CommandData):
     if data.user.name not in settings:
         return "Add your telegram id first with d!add"
     if len(data.parameters) != 1:
         return "I need the channel id, nothing more, nothing less"
     channel_id = int(data.parameters[0])
+    name = validation.validate_channel_id(data.guild, channel_id)
+    if name == "":
+        return "Can't add this channel. Please make sure your in the channel's server and it's the correct id"
     if channel_id not in channels:
         channels.append(channel_id)
     if channel_id not in settings[data.user.name]["Channels"]:
         settings[data.user.name]["Channels"].append(channel_id)
     save_settings()
     logger.log(f"(Channel added by {data.user.name}) total channels in system: {channels}")
-    return "Updated!"
+    return f"Updated! Added {name} to your track list"
 
 
-def remove_channel(data):
+def remove_channel(data: CommandData):
     if data.user.name not in settings:
         return "Add your telegram id first with d!add"
     if len(data.parameters) != 1:
@@ -199,7 +202,7 @@ def remove_channel(data):
     return "Updated!"
 
 
-def help_message(data):
+def help_message(data: CommandData):
     msg = ""
     command = data.command
     if command not in _commands.keys():
