@@ -1,4 +1,5 @@
 import json
+import logger
 
 _PATH = "setting.json"
 
@@ -64,6 +65,7 @@ def add_user(data):
         settings[data.user.name][key] = _default_values[key]
     settings[data.user.name]["TelegramId"] = int(data.parameters[0])
     save_settings()
+    logger.log(f"Added user {data.user.name}")
     return "Your id set to " + data.parameters[0] + " with the default preferences"
 
 
@@ -108,6 +110,7 @@ def remove(data):
         return "Already?! Am I that bad?"
     del settings[data.user.name]
     save_settings()
+    logger.log(f"Removed user {data.user.name}")
     return "R.I.P you " + data.user.name
 
 
@@ -163,6 +166,7 @@ def add_channel(data):
     if channel_id not in settings[data.user.name]["Channels"]:
         settings[data.user.name]["Channels"].append(channel_id)
     save_settings()
+    logger.log(f"(Channel added by {data.user.name}) total channels in system: {channels}")
     return "Updated!"
 
 
@@ -184,6 +188,7 @@ def remove_channel(data):
     if not usage:
         channels.remove(channel_id)
 
+    logger.log(f"(Channel removed by {data.user.name}) total channels in system: {channels}")
     save_settings()
     return "Updated!"
 
@@ -260,6 +265,8 @@ def get_message(name, channel, old_users, new_users):
         if preferences["MinMembers"] > len(old_users) or preferences["MaxMembers"] < len(new_users):
             return ""
         new_user = find_diff(old_users, new_users)
+        if new_users is None:
+            return ""
         if new_user.bot and preferences["Bots"]:
             return ""
         if len(old_users) < len(new_users) and preferences["Join"]:

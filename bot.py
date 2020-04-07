@@ -2,9 +2,10 @@ import discord
 import telegram
 import json
 import handler
+import logger
 
 
-def get_config(path="D:/JetBrainsProjects/PycharmProjects/DiscordBot/config.json"):
+def get_config(path="config.json"):
     with open(path, "r") as reader:
         return json.loads(reader.read())
 
@@ -18,6 +19,7 @@ def notify(members, new_members, bot, channel):
         message = handler.get_message(user, channel, members, new_members)
         if message == "":
             continue
+        logger.log(f"(to {user}) {message}d!removeChannel")
         bot.send_message(chat_id=handler.settings[user]["TelegramId"], text=message)
 
 
