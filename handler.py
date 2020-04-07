@@ -1,5 +1,6 @@
 import json
 import logger
+import validation
 
 _PATH = "setting.json"
 
@@ -39,15 +40,16 @@ settings, channels = read_setting()
 
 
 class CommandData:
-    def __init__(self, user, command, parameters):
+    def __init__(self, user, command: str, parameters: list, guild):
         self.user = user
         self.command = command
         self.parameters = parameters
+        self.guild = guild
 
 
 def handle_message(msg):
     command, parameters = extract_command(msg.content)
-    data = CommandData(msg.author, command, parameters)
+    data = CommandData(msg.author, command, parameters, msg.guild)
     if command in [*_commands]:
         reply = _commands[command](data)
     else:
@@ -60,6 +62,8 @@ def add_user(data):
         return "You're already in, use d!show to show your current telegram id or d!update to update it"
     if len(data.parameters) != 1:
         return "I need your telegram id, nothing more, nothing less"
+    if not validation.validate_telegram_id(data.parameters[0]):
+        return "Can't use this id, are you sure its correct?"
     settings[data.user.name] = dict()
     for key in [*_default_values]:
         settings[data.user.name][key] = _default_values[key]
@@ -72,6 +76,8 @@ def add_user(data):
 def update(data):
     if data.user.name not in settings:
         return "Add your telegram id first with d!add"
+    if not validation.validate_telegram_id(data.parameters[0]):
+        return "Can't use this id, are you sure its correct?"
     settings[data.user.name]["TelegramId"] = int(data.parameters[0])
     save_settings()
     return "Updated!"

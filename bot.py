@@ -19,7 +19,7 @@ def notify(members, new_members, bot, channel):
         message = handler.get_message(user, channel, members, new_members)
         if message == "":
             continue
-        logger.log(f"(to {user}) {message}d!removeChannel")
+        logger.log(f"(to {user}) {message}")
         bot.send_message(chat_id=handler.settings[user]["TelegramId"], text=message)
 
 
