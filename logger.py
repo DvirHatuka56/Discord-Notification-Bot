@@ -1,6 +1,6 @@
 import datetime
 
-PATH = "log.txt"
+PATH = "Files/log.txt"
 
 
 def log(text):

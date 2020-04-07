@@ -1,0 +1,22 @@
+The available commands are:
+    d!add TELEGRAM_ID - add your telegram id
+    d!update TELEGRAM_ID - update your telegram id
+    d!addChannel CHANNEL_ID - add channel that you want to get notifications on
+    d!removeChannel CHANNEL_ID - remove channel that you don't want to get notifications on
+    d!set Preference Value - set a notification preference to a certain value
+    d!remove - remove yourself from the service
+    d!pause - pause the service
+    d!continue - continue the service
+    d!help - help info
+    d!show - show your preferences
+
+Preferences:
+    Join (On / Off) - get notification whenever user connects (default On)
+    Leave (On / Off) - get notification whenever user disconnects (default On)
+    Bots (On / Off) - get notification whenever bots connects / disconnects (default Off)
+    DetailedMessage (On / Off) - get notification with the names of the users and the number of users connected (default Off)
+    ChannelName (On / Off) - get notification with the channel's name (default Off)
+    MinConnected (number) - get notification when there are more than a certain numbers of users connected (default 1)
+    MaxConnected (number) - DONT get notification when there are more than a certain numbers of users connected (default 9)
+
+Dvir Hatuka - 2020, https://github.com/DvirHatuka56/Discord-Notification-Bot

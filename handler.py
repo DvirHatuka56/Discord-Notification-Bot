@@ -2,14 +2,22 @@ import json
 import logger
 import validation
 
-_PATH = "setting.json"
+_SETTINGS_PATH = "Files/setting.json"
+_HELP_PATH = "Files/help.txt"
 
 
-def read_setting(path=_PATH):
+def read_setting(path=_SETTINGS_PATH):
     with open(path, "r") as reader:
         data = json.loads(reader.read())
         return data["Settings"], data["Channels"]
 
+
+def read_help(path=_HELP_PATH):
+    with open(path, "r") as reader:
+        return reader.read()
+
+
+_help_text = read_help()
 
 _commands = {
     "add": lambda d: add_user(d),
@@ -207,31 +215,7 @@ def help_message(data: CommandData):
     command = data.command
     if command not in _commands.keys():
         msg += command + " is not a command."
-
-    msg += """
-The available commands are:
-    d!add TELEGRAM_ID - add your telegram id
-    d!update TELEGRAM_ID - update your telegram id
-    d!addChannel CHANNEL_ID - add channel that you want to get notifications on
-    d!removeChannel CHANNEL_ID - remove channel that you don't want to get notifications on
-    d!set Preference Value - set a notification preference to a certain value
-    d!remove - remove yourself from the service
-    d!pause - pause the service
-    d!continue - continue the service
-    d!help - help info
-    d!show - show your preferences 
-
-Preferences:
-    Join (On / Off) - get notification whenever user connects  
-    Leave (On / Off) - get notification whenever user disconnects
-    Bots (On / Off) - get notification whenever bots connects / disconnects
-    DetailedMessage (On / Off) - get notification with the names of the users and the number of users connected
-    ChannelName (On / Off) - get notification with the channel's name
-    MinConnected (number) - get notification when there are more than a certain numbers of users connected
-    MaxConnected (number) - DONT get notification when there are more than a certain numbers of users connected
-
-Dvir Hatuka - 2020, https://github.com/DvirHatuka56/Discord-Notification-Bot
-    """
+    msg += _help_text
 
     return msg
 
@@ -246,7 +230,7 @@ def extract_command(content):
     return "", []
 
 
-def save_settings(path=_PATH):
+def save_settings(path=_SETTINGS_PATH):
     data = {"Settings": settings, "Channels": channels}
     with open(path, "w") as writer:
         writer.write(json.dumps(data))

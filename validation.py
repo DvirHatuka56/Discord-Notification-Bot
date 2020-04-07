@@ -4,8 +4,10 @@ import json
 import discord
 import discord.errors
 
+CONFIG_PATH = "Files/config.json"
 
-def get_config(path="config.json"):
+
+def get_config(path=CONFIG_PATH):
     with open(path, "r") as reader:
         config = json.loads(reader.read())
         return config["TelegramToken"], config["DiscordToken"]

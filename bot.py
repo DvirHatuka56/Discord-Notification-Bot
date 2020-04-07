@@ -4,8 +4,10 @@ import json
 import handler
 import logger
 
+CONFIG_PATH = "Files/config.json"
 
-def get_config(path="config.json"):
+
+def get_config(path=CONFIG_PATH):
     with open(path, "r") as reader:
         return json.loads(reader.read())
 
