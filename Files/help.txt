@@ -16,7 +16,7 @@ Preferences:
     Bots (On / Off) - get notification whenever bots connects / disconnects (default Off)
     DetailedMessage (On / Off) - get notification with the names of the users and the number of users connected (default Off)
     ChannelName (On / Off) - get notification with the channel's name (default Off)
-    MinConnected (number) - get notification when there are more than a certain numbers of users connected (default 1)
-    MaxConnected (number) - DONT get notification when there are more than a certain numbers of users connected (default 9)
+    MinMembers (number) - get notification when there are more than a certain numbers of users connected (default 1)
+    MaxMembers (number) - DONT get notification when there are more than a certain numbers of users connected (default 9)
 
 Dvir Hatuka - 2020, https://github.com/DvirHatuka56/Discord-Notification-Bot
