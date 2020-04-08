@@ -29,7 +29,8 @@ _commands = {
     "show": lambda d: show(d),
     "addChannel": lambda d: add_channel(d),
     "removeChannel": lambda d: remove_channel(d),
-    "help": lambda d: help_message(d)
+    "help": lambda d: help_message(d),
+    "33": lambda d: "39"  # HaHa ;)
 }
 
 _default_values = {
@@ -58,11 +59,10 @@ class CommandData:
 def handle_message(msg):
     command, parameters = extract_command(msg.content)
     data = CommandData(msg.author, command, parameters, msg.guild)
-    if command in [*_commands]:
-        reply = _commands[command](data)
-    else:
-        reply = help_message(data)
-    return reply
+    for key in [*_commands]:
+        if key.lower() == command.lower():
+            return _commands[key](data)
+    return f"{command} is not a command, check d!help for help"
 
 
 def add_user(data: CommandData):
@@ -98,15 +98,20 @@ def set_property(data: CommandData):
         preference = data.parameters[0]
         value = data.parameters[1]
 
-        if preference not in [*_default_values] or preference == "Active":
+        if preference.lower() not in [x.lower() for x in [*_default_values]] or preference.lower == "active":
             raise KeyError
 
-        if preference in ["MinMembers", "MaxMembers"]:
+        for key in [*_default_values]:
+            if key.lower() == preference.lower():
+                preference = key
+                break
+
+        if preference.lower() in ["minmembers", "maxmembers"]:
             value = int(value)
-        elif value not in ["On", "Off"]:
+        elif value.lower() not in ["on", "off"]:
             raise ValueError
         else:
-            value = value == "On"
+            value = value.lower() == "on"
 
         settings[data.user.name][preference] = value
         save_settings()
@@ -211,13 +216,7 @@ def remove_channel(data: CommandData):
 
 
 def help_message(data: CommandData):
-    msg = ""
-    command = data.command
-    if command not in _commands.keys():
-        msg += command + " is not a command."
-    msg += _help_text
-
-    return msg
+    return _help_text
 
 
 def extract_command(content):
@@ -268,9 +267,13 @@ def get_message(name, channel, old_users, new_users):
             msg += new_user.name + " left"
         if preferences["DetailedMessage"]:
             msg += " ( "
+            count = 0
             for user in new_users:
+                if user.bot:
+                    continue
                 msg += user.name + " "
-            msg += str(len(new_users)) + " )"
+                count += 1
+            msg += str(count) + " )"
         if preferences["ChannelName"]:
             msg += " on " + channel.guild.name + "/" + channel.name
         return msg
