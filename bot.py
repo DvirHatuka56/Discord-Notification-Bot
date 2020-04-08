@@ -49,8 +49,8 @@ async def on_ready():
             if channel_id not in members.keys():
                 members[channel_id] = []
 
-            # notify if there is more than one member
-            if channel.members != members[channel_id]:
+            # notify if there is a change
+            if [x.name for x in channel.members] != [x.name for x in members[channel_id]]:
                 notify(members[channel_id], channel.members, bot, channel)
             members[channel_id] = channel.members
 
