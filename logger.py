@@ -8,3 +8,7 @@ def log(text):
         now = datetime.datetime.now()
         date = f"{now.day}/{now.month}/{now.year} {now.hour}:{now.minute}:{now.second}"
         writer.write(f"{date}: {text}\n")
+
+
+def log_var(name, val):
+    log(f"{name}={val}")
