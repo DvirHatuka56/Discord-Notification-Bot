@@ -259,19 +259,19 @@ def get_message(name, channel, old_users, new_users):
         new_user = find_diff(old_users, new_users)
         if new_users is None:
             return ""
-        if new_user.bot and preferences["Bots"]:
+        if new_user["bot"] and not preferences["Bots"]:
             return ""
         if len(old_users) < len(new_users) and preferences["Join"]:
-            msg += new_user.name + " joined"
+            msg += new_user["name"] + " joined"
         if len(old_users) > len(new_users) and preferences["Leave"]:
-            msg += new_user.name + " left"
+            msg += new_user["name"] + " left"
         if preferences["DetailedMessage"]:
             msg += " ( "
             count = 0
             for user in new_users:
-                if user.bot:
+                if user["bot"]:
                     continue
-                msg += user.name + " "
+                msg += user["name"] + " "
                 count += 1
             msg += str(count) + " )"
         if preferences["ChannelName"]:
