@@ -14,6 +14,7 @@ def get_config(path=CONFIG_PATH):
 
 client = discord.Client()
 config = get_config()
+last_messages = {}
 
 
 def notify(members, new_members, bot, channel):
@@ -21,8 +22,42 @@ def notify(members, new_members, bot, channel):
         message = handler.get_message(user, channel, members, new_members)
         if message == "":
             continue
-        logger.log(f"(to {user}) {message}")
+        if user not in [*last_messages]:
+            last_messages[user] = ""
+        if message == last_messages[user]:
+            continue
         bot.send_message(chat_id=handler.settings[user]["TelegramId"], text=message)
+        logger.log(f"(to {user}) {message}")
+        last_messages[user] = message
+
+
+def get_data(members):
+    data = []
+    for member in members:
+        data.append({
+            "name": member.name,
+            "bot": member.bot
+        })
+    return data
+
+
+def equals(a: dict, b: dict):
+    try:
+        for key in a.keys():
+            if a[key] != b[key]:
+                return False
+        return True
+    except KeyError:
+        return False
+
+
+def compare(old: list, new: list):
+    if len(old) != len(new):
+        return False
+    for (item1, item2) in zip(old, new):
+        if not equals(item1, item2):
+            return False
+    return True
 
 
 @client.event
@@ -41,8 +76,8 @@ async def on_ready():
     bot = telegram.Bot(config["TelegramToken"])
     members = {}
     while True:
-        # get the channels data
         for channel_id in handler.channels:
+            # get the channels data
             await client.fetch_channel(channel_id)
             channel = client.get_channel(channel_id)
 
@@ -50,9 +85,12 @@ async def on_ready():
                 members[channel_id] = []
 
             # notify if there is a change
-            if [x.name for x in channel.members] != [x.name for x in members[channel_id]]:
-                notify(members[channel_id], channel.members, bot, channel)
-            members[channel_id] = channel.members
+            new_members = get_data(channel.members)
+            if not compare(members[channel_id], new_members):
+                logger.log_var("new_members", new_members)
+                logger.log_var("members[channel_id]", members[channel_id])
+                notify(members[channel_id], new_members, bot, channel)
+            members[channel_id] = get_data(channel.members)
 
 
 client.run(config["DiscordToken"])
